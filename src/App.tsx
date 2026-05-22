@@ -998,8 +998,6 @@ useEffect(() => {
 
           <a
             href="#contact"
-            target="_blank"
-            rel="noopener noreferrer"
             className="
               rounded-full
               border border-gray-300
