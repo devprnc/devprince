@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
 import {
   Github,
   Linkedin,
@@ -8,6 +9,13 @@ import {
   ArrowRight,
   ArrowUpRight,
   Download,
+  MessageCircle,
+  X,
+  Send,
+  Bot,
+  ChevronDown,
+  ChevronUp,
+  Menu,
 } from "lucide-react";
 
 import {
@@ -39,8 +47,10 @@ import {
   SiSharp,
 } from "react-icons/si";
 
+
 export default function App() {
   const [darkMode, setDarkMode] = useState(true);
+    const [mobileMenu, setMobileMenu] = useState(false);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -52,15 +62,209 @@ export default function App() {
     }
   }, [darkMode]);
 
+
+  const [chatOpen, setChatOpen] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  
+
+  const [messages, setMessages] = useState([
+    {
+      sender: "bot",
+      text: "Hi! I'm Prince AI Assistant 👋 Ask me about skills, experience, projects, contact info, tech stack, resume, or anything about Prince Louie.",
+    },
+  ]);
+
+  const [input, setInput] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(true);
+
+  const suggestions = [
+    "skills",
+    "experience",
+    "projects",
+    "contact",
+    "resume",
+    "frontend",
+    "backend",
+    "laravel",
+    "react",
+    "node",
+  ];
+
+  useEffect(() => {
+    const root = document.documentElement;
+
+    if (darkMode) {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+  }, [darkMode]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
+
+  const normalizeText = (text = '') => {
+    return text.toLowerCase().trim();
+  };
+
+  const getAIResponse = (message = '') => {
+    const msg = normalizeText(message);
+
+    // greetings
+    if (
+      msg.includes("hi") ||
+      msg.includes("hello") ||
+      msg.includes("hey")
+    ) {
+      return "Hello 👋 I'm Prince AI Assistant. Ask me about Prince's skills, projects, experience, tech stack, or contact details.";
+    }
+
+    // experience
+    if (
+      msg.includes("experience") ||
+      msg.includes("exp") ||
+      msg.includes("work")
+    ) {
+      return `Prince has 2+ years of experience as a Full-Stack Web Developer. He currently works at Xytron International developing enterprise systems using Laravel, ReactJS, MySQL, and modern web technologies.`;
+    }
+
+    // skills
+    if (
+      msg.includes("skill") ||
+      msg.includes("tech") ||
+      msg.includes("stack")
+    ) {
+      return `Prince specializes in Laravel, ReactJS, NodeJS, CodeIgniter, TailwindCSS, Bootstrap, MySQL, MongoDB, Firebase, and ExpressJS.`;
+    }
+
+    // frontend
+    if (
+      msg.includes("frontend") ||
+      msg.includes("front end") ||
+      msg.includes("ui")
+    ) {
+      return `Frontend technologies: ReactJS, HTML, CSS, JavaScript, TailwindCSS, and Bootstrap.`;
+    }
+
+    // backend
+    if (
+      msg.includes("backend") ||
+      msg.includes("server")
+    ) {
+      return `Backend technologies: Laravel, PHP, NodeJS, ExpressJS, and CodeIgniter.`;
+    }
+
+    // node
+    if (
+      msg.includes("node") ||
+      msg.includes("express")
+    ) {
+      return `Prince also develops backend APIs using NodeJS and ExpressJS.`;
+    }
+
+    // react
+    if (
+      msg.includes("react")
+    ) {
+      return `Prince uses ReactJS and React Native for building modern web and mobile applications.`;
+    }
+
+    // laravel
+    if (
+      msg.includes("laravel")
+    ) {
+      return `Laravel is one of Prince's primary backend frameworks for enterprise systems and APIs.`;
+    }
+
+    // projects
+    if (
+      msg.includes("project") ||
+      msg.includes("system")
+    ) {
+      return `Featured projects include UPA Rental App, MotoShop POS, HRIS, Student Management System, Evacuation Center System, and Barangay Management System.`;
+    }
+
+    // resume
+    if (
+      msg.includes("resume") ||
+      msg.includes("cv")
+    ) {
+      return `You can download Prince's resume using the Download CV button in the Hero section.`;
+    }
+
+    // contact
+    if (
+      msg.includes("contact") ||
+      msg.includes("email") ||
+      msg.includes("phone")
+    ) {
+      return `You can contact Prince through email at princepaquiado20@gmail.com or phone number +63 992 418 3277.`;
+    }
+
+    // github
+    if (
+      msg.includes("github")
+    ) {
+      return `Github: https://github.com/princepaqs`;
+    }
+
+    // default
+    return `I'm still learning 🤖 Try asking about:
+- skills
+- experience
+- projects
+- Laravel
+- React
+- backend
+- frontend
+- contact`;
+  };
+
+  const sendMessage = (customText = null) => {
+    const finalMessage = customText || input;
+
+    if (!finalMessage.trim()) return;
+
+    const userMessage = {
+      sender: "user",
+      text: finalMessage,
+    };
+
+    const botMessage = {
+      sender: "bot",
+      text: getAIResponse(finalMessage),
+    };
+
+    setMessages((prev) => [
+      ...prev,
+      userMessage,
+      botMessage,
+    ]);
+
+    setInput("");
+  };
+
   const projects = [
   {
-    title: "UPA - Property Rental App",
+    title: "RentSpace",
     description:
-      "Award-winning thesis project connecting tenants and property owners through a mobile and web rental platform.",
+      "This project connecting tenants and property owners through a mobile and web rental platform.",
     tech: [
       {
-        name: "Laravel",
-        icon: <FaLaravel className="text-red-500" />,
+        name: "ReactJS",
+        icon: <FaReact className="text-cyan-400" />,
+      },
+      {
+        name: "NodeJS",
+        icon: <FaNodeJs className="text-green-500" />,
+      },
+      {
+        name: "TailwindCSS",
+        icon: <SiTailwindcss className="text-cyan-500" />,
       },
       {
         name: "React Native",
@@ -71,7 +275,8 @@ export default function App() {
         icon: <SiFirebase className="text-yellow-400" />,
       },
     ],
-    image: "/img/service1.jpg",
+    image: "/img/rentspace.png",
+    link: "https://rentspaceapp.netlify.app/",
   },
 
   {
@@ -145,6 +350,10 @@ export default function App() {
       {
         name: "React Native",
         icon: <FaReact className="text-cyan-400" />,
+      },
+      {
+        name: "TailwindCSS",
+        icon: <SiTailwindcss className="text-cyan-500" />,
       },
       {
         name: "Firebase",
@@ -345,6 +554,37 @@ export default function App() {
   },
 ];
 
+
+useEffect(() => {
+  const sections =
+    document.querySelectorAll(".fade-section");
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("show");
+        } else {
+          entry.target.classList.remove("show");
+        }
+      });
+    },
+    {
+      threshold: 0.2,
+    }
+  );
+
+  sections.forEach((section) => {
+    observer.observe(section);
+  });
+
+  return () => {
+    sections.forEach((section) => {
+      observer.unobserve(section);
+    });
+  };
+}, []);
+
   return (
     <div
       className="
@@ -368,49 +608,170 @@ export default function App() {
       {/* Navbar */}
       <nav
         className="
-          fixed top-0 left-0 right-0 z-50
-          border-b border-black/5 dark:border-white/10
-          bg-white/70 dark:bg-[#020617]/70
+          fixed
+          top-0
+          left-0
+          right-0
+          z-50
+          border-b
+          border-black/5
+          bg-white/70
           backdrop-blur-xl
+          dark:border-white/10
+          dark:bg-[#020617]/70
         "
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <a href="#" className="text-lg font-bold tracking-[0.2em]">
+        <div
+          className="
+            mx-auto
+            flex
+            max-w-6xl
+            items-center
+            justify-between
+            px-4
+            py-4
+            md:px-6
+          "
+        >
+          {/* LOGO */}
+          <a
+            href="#"
+            className="
+              text-base
+              font-bold
+              tracking-[0.2em]
+              md:text-lg
+            "
+          >
             PL
           </a>
 
+          {/* DESKTOP MENU */}
           <div className="hidden items-center gap-6 md:flex">
-            {["About", "Skills", "Experience", "Projects", "Contact"].map(
-              (item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  className="
-                    text-sm
-                    text-gray-600
-                    transition
-                    hover:text-blue-500
-                    dark:text-gray-300
-                  "
-                >
-                  {item}
-                </a>
-              )
-            )}
+            {[
+              "About",
+              "Skills",
+              "Experience",
+              "Projects",
+              "Contact",
+            ].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="
+                  text-sm
+                  text-gray-600
+                  transition
+                  hover:text-blue-500
+                  dark:text-gray-300
+                "
+              >
+                {item}
+              </a>
+            ))}
           </div>
 
-          <button
-            onClick={() => setDarkMode(!darkMode)}
+          {/* RIGHT SIDE */}
+          <div className="flex items-center gap-2">
+            {/* DARK MODE */}
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="
+                rounded-full
+                border
+                border-black/10
+                p-2
+                transition
+                hover:rotate-180
+                dark:border-white/10
+              "
+            >
+              {darkMode ? (
+                <Sun size={16} />
+              ) : (
+                <Moon size={16} />
+              )}
+            </button>
+
+            {/* MOBILE MENU BUTTON */}
+            <button
+              onClick={() => setMobileMenu(!mobileMenu)}
+              className="
+                flex
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-black/10
+                p-2
+                md:hidden
+                dark:border-white/10
+              "
+            >
+              <Menu size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* MOBILE MENU */}
+        <div
+          className={`
+            overflow-hidden
+            transition-all
+            duration-300
+            md:hidden
+
+            ${
+              mobileMenu
+                ? "max-h-[400px] opacity-100"
+                : "max-h-0 opacity-0"
+            }
+          `}
+        >
+          <div
             className="
-              rounded-full
-              border border-black/10 dark:border-white/10
-              p-2
-              transition
-              hover:rotate-180
+              flex
+              flex-col
+              gap-1
+              border-t
+              border-black/5
+              bg-white/90
+              px-4
+              py-4
+              backdrop-blur-xl
+              dark:border-white/10
+              dark:bg-[#020617]/90
             "
           >
-            {darkMode ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
+            {[
+              "About",
+              "Skills",
+              "Experience",
+              "Projects",
+              "Contact",
+            ].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                onClick={() => setMobileMenu(false)}
+                className="
+                  rounded-xl
+                  px-4
+                  py-3
+                  text-sm
+                  font-medium
+                  text-gray-700
+                  transition
+                  hover:bg-black/5
+                  hover:text-blue-500
+                  dark:text-gray-200
+                  dark:hover:bg-white/5
+                "
+              >
+                {item}
+              </a>
+            ))}
+          </div>
         </div>
       </nav>
 
@@ -544,7 +905,10 @@ export default function App() {
       </section>
 
       {/* About */}
-      <section id="about" className="mx-auto max-w-5xl px-6 py-20">
+      <section
+        id="about"
+        className="fade-section mx-auto max-w-5xl px-6 py-20"
+      >
         <div className="mb-10">
           <h2 className="animate-heading text-3xl font-bold md:text-4xl">
             About Me
@@ -626,7 +990,7 @@ export default function App() {
       </section>
 
       {/* Skills */}
-      <section id="skills" className="mx-auto max-w-5xl px-6 py-20">
+      <section id="skills" className="fade-section mx-auto max-w-5xl px-6 py-20">
         <div className="mb-10 text-center">
           <h2 className="animate-heading text-3xl font-bold md:text-4xl">
             Skills & Tech Stack
@@ -696,7 +1060,7 @@ export default function App() {
       </section>
 
       {/* Experience */}
-      <section id="experience" className="mx-auto max-w-5xl px-6 py-20">
+      <section id="experience" className="fade-section mx-auto max-w-5xl px-6 py-20">
         <div className="mb-10 text-center">
           <h2 className="animate-heading text-3xl font-bold md:text-4xl">
             Experience
@@ -758,7 +1122,7 @@ export default function App() {
       </section>
 
       {/* Projects */}
-      <section id="projects" className="mx-auto max-w-5xl px-6 py-20">
+      <section id="projects" className="fade-section mx-auto max-w-5xl px-6 py-20">
         <div className="mb-10 text-center">
           <h2 className="animate-heading text-3xl font-bold md:text-4xl">
             Featured Projects
@@ -770,82 +1134,119 @@ export default function App() {
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project, index) => (
-            <div
-              key={index}
-              className="
-                group
-                relative
-                overflow-hidden
-                rounded-[28px]
-                border border-gray-200
-                bg-white/70
-                shadow-xl
-                backdrop-blur-xl
-                transition-all duration-700
-                hover:-translate-y-4
-                hover:scale-[1.03]
-                hover:shadow-[0_0_60px_rgba(59,130,246,0.35)]
-                dark:border-white/10
-                dark:bg-white/5
-              "
-            >
-              <div className="relative h-40 overflow-hidden">
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="h-full w-full object-cover transition duration-[1600ms] ease-out group-hover:scale-110"
+        {projects.map((project, index) => (
+          <a
+            key={index}
+            href={project.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              group
+              relative
+              overflow-hidden
+              rounded-[28px]
+              border border-gray-200
+              bg-white/70
+              shadow-xl
+              backdrop-blur-xl
+              transition-all duration-500
+              hover:-translate-y-3
+              hover:scale-[1.02]
+              hover:shadow-[0_0_60px_rgba(59,130,246,0.25)]
+              active:scale-[0.98]
+              dark:border-white/10
+              dark:bg-white/5
+            "
+          >
+            {/* IMAGE */}
+            <div className="relative h-52 overflow-hidden">
+              <img
+                src={project.image}
+                alt={project.title}
+                className="
+                  h-full
+                  w-full
+                  object-cover
+                  transition duration-[1600ms] ease-out
+                  group-hover:scale-110
+                "
+              />
+
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+
+              {/* Arrow */}
+              <div
+                className="
+                  absolute
+                  right-4
+                  top-4
+                  flex
+                  h-10
+                  w-10
+                  items-center
+                  justify-center
+                  rounded-full
+                  border border-white/20
+                  bg-white/20
+                  backdrop-blur-md
+                  transition-all duration-300
+                  group-hover:rotate-45
+                  group-hover:bg-white
+                "
+              >
+                <ArrowUpRight
+                  size={18}
+                  className="text-white group-hover:text-black"
                 />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-
-                <div className="absolute right-4 top-4 rounded-full bg-white/20 p-2 backdrop-blur-md">
-                  <ArrowUpRight size={18} className="text-white" />
-                </div>
-
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-sm font-bold text-white">
-                    {project.title}
-                  </h3>
-                </div>
               </div>
 
-              <div className="p-6">
-                <p className="mb-6 text-xs leading-7 text-gray-600 dark:text-gray-300">
-                  {project.description}
-                </p>
-
-                <div className="flex flex-wrap gap-2">
-                  {project.tech.map((tech, i) => (
-                    <div
-                      key={i}
-                      className="
-                        flex items-center gap-2
-                        rounded-full
-                        border border-white/10
-                        bg-black/5
-                        dark:bg-white/5
-                        px-3 py-1.5
-                        text-xs
-                        font-medium
-                        backdrop-blur-md
-                        transition-all
-                        duration-300
-                        hover:scale-105
-                      "
-                    >
-                      <span className="text-base">{tech.icon}</span>
-
-                      <span className="text-gray-700 dark:text-gray-200">
-                        {tech.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+              {/* Title */}
+              <div className="absolute bottom-4 left-4 right-4">
+                <h3 className="text-lg font-bold text-white">
+                  {project.title}
+                </h3>
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* CONTENT */}
+            <div className="p-6">
+              <p className="mb-6 text-sm leading-7 text-gray-600 dark:text-gray-300">
+                {project.description}
+              </p>
+
+              {/* TECH STACK */}
+              <div className="flex flex-wrap gap-2">
+                {project.tech.map((tech, i) => (
+                  <div
+                    key={i}
+                    className="
+                      flex items-center gap-2
+                      rounded-full
+                      border border-gray-200
+                      bg-black/[0.03]
+                      dark:bg-white/5
+                      px-3 py-1.5
+                      text-xs font-medium
+                      backdrop-blur-md
+                      transition-all duration-300
+                      hover:scale-105
+                      hover:border-blue-400
+                      hover:bg-blue-500/10
+                    "
+                  >
+                    <span className="text-base">{tech.icon}</span>
+
+                    <span className="text-gray-700 dark:text-gray-200">
+                      {tech.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
       </section>
 
       {/* Contact */}
@@ -969,6 +1370,309 @@ export default function App() {
       >
         © 2026 Prince Louie T. Paquiado. All rights reserved.
       </footer>
+
+      {/* CHATBOT */}
+      <div className="fixed bottom-6 right-6 z-[999]">
+        {!chatOpen && (
+          <button
+            onClick={() => setChatOpen(true)}
+            className="
+              group
+              flex
+              items-center
+              gap-3
+              rounded-full
+              bg-blue-500
+              px-5
+              py-4
+              text-white
+              shadow-2xl
+              transition-all
+              duration-300
+              hover:scale-105
+              hover:bg-blue-600
+            "
+          >
+            <span className="text-sm font-semibold">
+              <MessageCircle/>
+            </span>
+          </button>
+        )}
+
+        {chatOpen && (
+          <div
+            className="
+              flex
+              h-[620px]
+              w-[360px]
+              flex-col
+              overflow-hidden
+              rounded-3xl
+              border
+              border-black/10
+              bg-white
+              shadow-[0_20px_80px_rgba(0,0,0,0.25)]
+              dark:border-white/10
+              dark:bg-[#0f172a]
+            "
+          >
+            {/* HEADER */}
+            <div
+              className="
+                flex
+                items-center
+                justify-between
+                border-b
+                border-black/10
+                bg-blue-500
+                px-5
+                py-4
+                text-white
+                dark:border-white/10
+              "
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="
+                    flex
+                    h-10
+                    w-10
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-white/20
+                  "
+                >
+                  <Bot size={20} />
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold">
+                    Prince AI Assistant
+                  </h3>
+
+                  <p className="text-xs text-blue-100">
+                    Online
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setChatOpen(false)}
+                className="
+                  rounded-full
+                  p-2
+                  transition
+                  hover:bg-white/20
+                "
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* CHAT BODY */}
+            <div
+              className="
+                flex-1
+                space-y-4
+                overflow-y-auto
+                bg-slate-50
+                p-4
+                dark:bg-[#020617]
+              "
+            >
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex ${
+                    msg.sender === "user"
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`
+                      max-w-[85%]
+                      rounded-2xl
+                      px-4
+                      py-3
+                      text-sm
+                      leading-7
+                      shadow-md
+
+                      ${
+                        msg.sender === "user"
+                          ? "bg-blue-500 text-white"
+                          : "bg-white text-gray-700 dark:bg-white/10 dark:text-gray-200"
+                      }
+                    `}
+                  >
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* SUGGESTION DRAWER */}
+            <div
+              className="
+                relative
+                border-t
+                border-black/5
+                dark:border-white/10
+                bg-white
+                dark:bg-[#0f172a]
+                pt-6
+              "
+            >
+              {/* FLOATING TOGGLE BUTTON */}
+              <button
+                onClick={() =>
+                  setShowSuggestions(!showSuggestions)
+                }
+                className="
+                  absolute
+                  -top-5
+                  left-1/2
+                  z-20
+                  flex
+                  h-10
+                  w-10
+                  -translate-x-1/2
+                  items-center
+                  justify-center
+                  rounded-full
+                  border
+                  border-black/10
+                  bg-white
+                  text-gray-700
+                  shadow-xl
+                  transition-all
+                  duration-300
+                  hover:scale-110
+                  hover:bg-blue-500
+                  hover:text-white
+                  dark:border-white/10
+                  dark:bg-[#1e293b]
+                  dark:text-white
+                "
+              >
+                {showSuggestions ? (
+                  <ChevronDown size={18} />
+                ) : (
+                  <ChevronUp size={18} />
+                )}
+              </button>
+
+              {/* DRAWER CONTENT */}
+              <div
+                className={`
+                  overflow-hidden
+                  transition-all
+                  duration-300
+
+                  ${
+                    showSuggestions
+                      ? "max-h-[200px] opacity-100"
+                      : "max-h-0 opacity-0"
+                  }
+                `}
+              >
+                  <div
+                    className="
+                    flex
+                    flex-wrap
+                    gap-2
+                    px-3
+                    pb-4
+                    pt-2
+                  "
+                >
+                  {suggestions.map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={() => sendMessage(item)}
+                      className="
+                        rounded-full
+                        bg-blue-500/10
+                        px-3
+                        py-1.5
+                        text-xs
+                        font-medium
+                        text-blue-500
+                        transition
+                        hover:bg-blue-500
+                        hover:text-white
+                      "
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* INPUT */}
+            <div
+              className="
+                flex
+                items-center
+                gap-3
+                border-t
+                border-black/10
+                p-4
+                dark:border-white/10
+              "
+            >
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === "Enter" && sendMessage()
+                }
+                placeholder="Ask something..."
+                className="
+                  flex-1
+                  rounded-2xl
+                  border
+                  border-gray-300
+                  bg-white
+                  px-4
+                  py-3
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-blue-500
+                  dark:border-white/10
+                  dark:bg-[#1e293b]
+                  dark:text-white
+                "
+              />
+
+              <button
+                onClick={() => sendMessage()}
+                className="
+                  flex
+                  h-12
+                  w-12
+                  items-center
+                  justify-center
+                  rounded-2xl
+                  bg-blue-500
+                  text-white
+                  transition
+                  hover:bg-blue-600
+                "
+              >
+                <Send size={18} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
     </div>
+    
   );
 }

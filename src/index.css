@@ -195,3 +195,18 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #0e2179;
 }
+
+
+.fade-section {
+  opacity: 0;
+  transform: translateY(80px);
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
+  will-change: opacity, transform;
+}
+
+.fade-section.show {
+  opacity: 1;
+  transform: translateY(0);
+}
