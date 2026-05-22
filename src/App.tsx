@@ -851,7 +851,7 @@ useEffect(() => {
 
         <div className="mt-8 flex gap-4">
           <a
-            href="https://github.com/princepaqs"
+            href="https://github.com/devprnc"
             target="_blank"
             rel="noreferrer"
             className="
@@ -869,7 +869,7 @@ useEffect(() => {
           </a>
 
           <a
-            href="https://linkedin.com"
+            href="https://www.linkedin.com/in/prince-louie-paquiado-4748b0326/"
             target="_blank"
             rel="noreferrer"
             className="
@@ -887,7 +887,9 @@ useEffect(() => {
           </a>
 
           <a
-            href="mailto:princepaquiado20@gmail.com"
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=princepaquiado20@gmail.com&su=Portfolio%20Inquiry&body=Hello%20Prince,"
+            target="_blank"
+            rel="noopener noreferrer"
             className="
               rounded-full
               border border-gray-300
