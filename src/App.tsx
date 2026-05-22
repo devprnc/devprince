@@ -1075,9 +1075,9 @@ useEffect(() => {
 
           <div className="mt-7 flex flex-wrap gap-3">
             {[
-              "2 Years Experience",
+              "3 Years Experience",
               "Laravel Developer",
-              "ReactJS Developer",
+              "MERN Stack Developer",
               "Best in Thesis 2025",
             ].map((item, index) => (
               <div
