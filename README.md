@@ -1,10 +1,10 @@
-# Prince Louie T. Paquiado - Portfolio
+# Prince Louie Paquiado - Portfolio
 
 Modern and responsive personal portfolio website built using ReactJS, TypeScript, TailwindCSS, and EmailJS.
 
 ## 🚀 Live Demo
 
-🔗 https://your-live-demo-link.com](https://devprinceportfolio.netlify.app/
+🔗 https://devprinceportfolio.netlify.app
 
 ## 📌 Features
 
