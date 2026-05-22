@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-
+import emailjs from "@emailjs/browser";
 import {
   Github,
   Linkedin,
@@ -229,6 +229,8 @@ export default function App() {
 
     if (!finalMessage.trim()) return;
 
+    const normalized = normalizeText(finalMessage);
+
     const userMessage = {
       sender: "user",
       text: finalMessage,
@@ -245,8 +247,27 @@ export default function App() {
       botMessage,
     ]);
 
+    // REDIRECT TO CONTACT PAGE
+    if (
+      normalized.includes("contact") ||
+      normalized.includes("email") ||
+      normalized.includes("phone")
+    ) {
+      setTimeout(() => {
+        window.location.href = "/#contact";
+      }, 500);
+    }
+
     setInput("");
   };
+
+  const [emailModal, setEmailModal] = useState(false);
+
+  const [emailStatus, setEmailStatus] = useState<
+    "success" | "error"
+  >("success");
+
+  const [emailMessage, setEmailMessage] = useState("");
 
   const projects = [
   {
@@ -585,6 +606,69 @@ useEffect(() => {
   };
 }, []);
 
+
+  const sendEmail = (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+
+    const now = new Date();
+
+    const timestamp = now.toLocaleString("en-PH", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    const existing =
+      form.querySelector('input[name="timestamp"]');
+
+    if (!existing) {
+      const time = document.createElement("input");
+
+      time.type = "hidden";
+      time.name = "timestamp";
+      time.value = timestamp;
+
+      form.appendChild(time);
+    }
+
+    emailjs
+      .sendForm(
+        "service_j4xmz6e",
+        "template_cy5c77p",
+        form,
+      "MXcKRUXgUP_6ZMGBX"
+    )
+    .then(() => {
+      setEmailStatus("success");
+
+      setEmailMessage(
+        "Your message has been sent successfully!"
+      );
+
+      setEmailModal(true);
+
+      form.reset();
+    })
+    .catch((error) => {
+      console.log(error);
+
+      setEmailStatus("error");
+
+      setEmailMessage(
+        "Failed to send message. Please try again."
+      );
+
+      setEmailModal(true);
+    });
+  };
+
   return (
     <div
       className="
@@ -648,28 +732,50 @@ useEffect(() => {
 
           {/* DESKTOP MENU */}
           <div className="hidden items-center gap-6 md:flex">
-            {[
-              "About",
-              "Skills",
-              "Experience",
-              "Projects",
-              "Contact",
-            ].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
+          {[
+            "Home",
+            "About",
+            "Skills",
+            "Experience",
+            "Projects",
+            "Contact",
+          ].map((item) => (
+            <a
+              key={item}
+              href={
+                item === "Home"
+                  ? "#"
+                  : `#${item.toLowerCase()}`
+              }
+              className="
+                relative
+                text-sm
+                font-medium
+                text-gray-600
+                transition-all
+                duration-300
+                hover:text-blue-500
+                dark:text-gray-300
+              "
+            >
+              {item}
+
+              <span
                 className="
-                  text-sm
-                  text-gray-600
-                  transition
-                  hover:text-blue-500
-                  dark:text-gray-300
+                  absolute
+                  -bottom-1
+                  left-0
+                  h-[2px]
+                  w-0
+                  bg-blue-500
+                  transition-all
+                  duration-300
+                  group-hover:w-full
                 "
-              >
-                {item}
-              </a>
-            ))}
-          </div>
+              />
+            </a>
+          ))}
+        </div>
 
           {/* RIGHT SIDE */}
           <div className="flex items-center gap-2">
@@ -1253,110 +1359,195 @@ useEffect(() => {
 
       {/* Contact */}
       <section id="contact" className="mx-auto max-w-5xl px-6 py-24">
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div>
-            <h2 className="animate-heading text-3xl font-bold md:text-4xl">
-              LET'S TALK!
-            </h2>
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Left Side */}
+        <div>
+          <h2 className="animate-heading text-3xl font-bold md:text-4xl">
+            LET&apos;S TALK!
+          </h2>
 
-            <p className="mt-5 text-sm leading-7 text-gray-600 dark:text-gray-300">
-              Feel free to contact me for freelance projects, collaborations,
-              internships, or full-time opportunities.
-            </p>
+          <p className="mt-5 text-sm leading-7 text-gray-600 dark:text-gray-300">
+            Feel free to contact me for freelance projects,
+            collaborations, internships, or full-time opportunities.
+          </p>
 
-            <div className="mt-6 space-y-4">
-              {[
-                {
-                  label: "Email",
-                  value: "princepaquiado20@gmail.com",
-                },
-                {
-                  label: "Phone",
-                  value: "+63 992 418 3277",
-                },
-                {
-                  label: "Github",
-                  value: "github.com/princepaqs",
-                },
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className="
-                    rounded-2xl
-                    border border-black/5
-                    bg-white/70
-                    p-4
-                    backdrop-blur-xl
-                    dark:border-white/10
-                    dark:bg-white/5
-                  "
-                >
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {item.label}
-                  </p>
+          <div className="mt-6 space-y-4">
+            {[
+              {
+                label: "Email",
+                value: "princepaquiado20@gmail.com",
+              },
+              {
+                label: "Phone",
+                value: "+63 992 418 3277",
+              },
+              {
+                label: "Github",
+                value: "github.com/princepaqs",
+              },
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="
+                  rounded-2xl
+                  border border-black/5
+                  bg-white/70
+                  p-4
+                  backdrop-blur-xl
+                  dark:border-white/10
+                  dark:bg-white/5
+                "
+              >
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {item.label}
+                </p>
 
-                  <h3 className="mt-1 text-sm font-semibold">
-                    {item.value}
-                  </h3>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div
-            className="
-              flex min-h-[340px]
-              flex-col
-              items-center
-              justify-center
-              rounded-3xl
-              border border-black/5
-              bg-white/70
-              p-6
-              text-center
-              shadow-lg
-              backdrop-blur-xl
-              dark:border-white/10
-              dark:bg-white/5
-            "
-          >
-            <div
-              className="
-                mb-5
-                flex h-14 w-14
-                items-center justify-center
-                rounded-full
-                bg-blue-500/10
-                text-blue-500
-              "
-            >
-              <Mail size={28} />
-            </div>
-
-            <h3 className="text-xl font-bold">Contact Form</h3>
-
-            <p className="mt-4 max-w-sm text-sm leading-7 text-gray-600 dark:text-gray-300">
-              The contact form is still in development. Feel free to reach out
-              through email or social platforms.
-            </p>
-
-            <div
-              className="
-                mt-6
-                rounded-full
-                border border-blue-500/20
-                bg-blue-500/10
-                px-4 py-2
-                text-xs
-                font-medium
-                text-blue-500
-              "
-            >
-              Coming Soon
-            </div>
+                <h3 className="mt-1 text-sm font-semibold">
+                  {item.value}
+                </h3>
+              </div>
+            ))}
           </div>
         </div>
-      </section>
+
+        {/* Right Side */}
+        <div
+          className="
+            rounded-3xl
+            border border-black/5
+            bg-white/70
+            p-6
+            shadow-lg
+            backdrop-blur-xl
+            dark:border-white/10
+            dark:bg-white/5
+          "
+        >
+          <div
+            className="
+              mb-5
+              flex h-14 w-14
+              items-center justify-center
+              rounded-full
+              bg-blue-500/10
+              text-blue-500
+            "
+          >
+            <Mail size={28} />
+          </div>
+
+          <h3 className="text-xl font-bold">Send Message</h3>
+
+          <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300">
+            Send me a message directly through the contact form.
+          </p>
+
+          <form
+            onSubmit={sendEmail}
+            className="mt-6 space-y-4"
+          >
+            <div>
+              <input
+                type="text"
+                name="title"
+                placeholder="Subject"
+                required
+                className="
+                  w-full rounded-2xl
+                  border border-black/10
+                  bg-white/70
+                  px-4 py-3
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-blue-500
+                  dark:border-white/10
+                  dark:bg-white/5
+                "
+              />
+            </div>
+
+            <div>
+              <input
+                type="text"
+                name="from_name"
+                placeholder="Your Name"
+                required
+                className="
+                  w-full rounded-2xl
+                  border border-black/10
+                  bg-white/70
+                  px-4 py-3
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-blue-500
+                  dark:border-white/10
+                  dark:bg-white/5
+                "
+              />
+            </div>
+
+            <div>
+              <input
+                type="email"
+                name="from_email"
+                placeholder="Your Email"
+                required
+                className="
+                  w-full rounded-2xl
+                  border border-black/10
+                  bg-white/70
+                  px-4 py-3
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-blue-500
+                  dark:border-white/10
+                  dark:bg-white/5
+                "
+              />
+            </div>
+
+            <div>
+              <textarea
+                name="message"
+                rows={5}
+                placeholder="Write your message..."
+                required
+                className="
+                  w-full resize-none rounded-2xl
+                  border border-black/10
+                  bg-white/70
+                  px-4 py-3
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-blue-500
+                  dark:border-white/10
+                  dark:bg-white/5
+                "
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="
+                w-full rounded-2xl
+                bg-blue-600
+                px-6 py-3
+                text-sm font-semibold text-white
+                transition-all
+                hover:-translate-y-1
+                hover:bg-blue-700
+              "
+            >
+              Send Message
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
 
       {/* Footer */}
       <footer
@@ -1372,6 +1563,88 @@ useEffect(() => {
       >
         © 2026 Prince Louie T. Paquiado. All rights reserved.
       </footer>
+      {/* EMAIL STATUS MODAL */}
+{emailModal && (
+  <div
+    className="
+      fixed inset-0 z-[9999]
+      flex items-center justify-center
+      bg-black/60
+      px-4
+      backdrop-blur-sm
+    "
+  >
+    <div
+      className="
+        w-full max-w-md
+        rounded-3xl
+        border border-white/10
+        bg-white
+        p-6
+        shadow-2xl
+        dark:bg-[#0f172a]
+      "
+    >
+      <div
+        className={`
+          mx-auto
+          flex h-16 w-16
+          items-center justify-center
+          rounded-full
+          ${
+            emailStatus === "success"
+              ? "bg-green-500/10 text-green-500"
+              : "bg-red-500/10 text-red-500"
+          }
+        `}
+      >
+        {emailStatus === "success" ? (
+          <Mail size={30} />
+        ) : (
+          <X size={30} />
+        )}
+      </div>
+
+      <h3 className="mt-5 text-center text-xl font-bold">
+        {emailStatus === "success"
+          ? "Message Sent"
+          : "Sending Failed"}
+      </h3>
+
+      <p
+        className="
+          mt-3
+          text-center
+          text-sm
+          leading-7
+          text-gray-600
+          dark:text-gray-300
+        "
+      >
+        {emailMessage}
+      </p>
+
+      <button
+        onClick={() => setEmailModal(false)}
+        className="
+          mt-6
+          w-full
+          rounded-2xl
+          bg-blue-600
+          px-5
+          py-3
+          text-sm
+          font-semibold
+          text-white
+          transition
+          hover:bg-blue-700
+        "
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
 
       {/* CHATBOT */}
       <div className="fixed bottom-6 right-6 z-[999]">
