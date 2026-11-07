@@ -4,7 +4,7 @@ Modern and responsive personal portfolio website built using ReactJS, TypeScript
 
 ## 🚀 Live Demo
 
-🔗 https://devprinceportfolio.netlify.app
+🔗 https://princepaquiado.vercel.app/
 
 ## 📌 Features
 
