@@ -722,10 +722,11 @@ useEffect(() => {
       {/* Dashboard top bar */}
       <header className="fixed left-0 right-0 top-0 z-40 border-b border-slate-800 bg-[#0b1220]/95 backdrop-blur-xl lg:left-64">
         <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-400/30 bg-emerald-400/10 font-mono text-xs font-bold text-emerald-300 lg:hidden">&gt;_</span>
+          <div className="flex items-center gap-5">
+            
             <button aria-label="Toggle navigation menu" aria-expanded={mobileMenu} onClick={() => setMobileMenu(!mobileMenu)} className="rounded-lg border border-slate-700 p-2 text-slate-300 lg:hidden"><Menu size={18}/></button>
-            <div><p className="text-xs text-slate-500">Developer Workspace</p><p className="text-sm font-semibold text-white">Portfolio Overview <span className="ml-1 font-mono text-emerald-400">~/dashboard</span></p></div>
+            <span className="flex h-8 w-8 items-center justify-center font-mono text-lg font-bold lg:hidden"><span className="text-emerald-400">&lt;</span>PL<span className="text-emerald-400">/&gt;</span></span>
+          
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/5 px-3 py-1.5 text-[11px] text-emerald-300 sm:flex"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400"/> Available for work</span>
