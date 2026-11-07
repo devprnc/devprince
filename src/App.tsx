@@ -4,8 +4,6 @@ import {
   Github,
   Linkedin,
   Mail,
-  Moon,
-  Sun,
   ArrowRight,
   ArrowUpRight,
   Download,
@@ -17,6 +15,8 @@ import {
   ChevronUp,
   Menu,
   Loader2,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 import {
@@ -47,23 +47,23 @@ import {
   SiC,
   SiSharp,
 } from "react-icons/si";
+import ReCAPTCHA from "react-google-recaptcha";
 
 
 export default function App() {
-  const [darkMode, setDarkMode] = useState(true);
     const [mobileMenu, setMobileMenu] = useState(false);
-  const [sending, setSending] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === "undefined") return true;
+    try { return window.localStorage.getItem("portfolio-theme") !== "light"; }
+    catch { return true; }
+  });
+
   useEffect(() => {
-    const root = document.documentElement;
-
-    if (darkMode) {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
+    try { window.localStorage.setItem("portfolio-theme", darkMode ? "dark" : "light"); }
+    catch { /* Storage may be unavailable; theme still works for this session. */ }
   }, [darkMode]);
-
-
+  const [sending, setSending] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -93,172 +93,60 @@ export default function App() {
   ];
 
   useEffect(() => {
-    const root = document.documentElement;
-
-    if (darkMode) {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  }, [darkMode]);
-
-  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
     });
   }, [messages]);
 
-  const normalizeText = (text = '') => {
-    return text.toLowerCase().trim();
-  };
+  const normalizeText = (text = "") =>
+    text.toLowerCase().trim().replace(/[^a-z0-9+#.\s]/g, " ").replace(/\s+/g, " ");
 
-  const getAIResponse = (message = '') => {
+  const getAIResponse = (message = "") => {
     const msg = normalizeText(message);
+    const has = (...terms: string[]) => terms.some((term) =>
+      new RegExp(`(^|\\s)${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\s|$)`, "i").test(msg)
+    );
 
-    // greetings
-    if (
-      msg.includes("hi") ||
-      msg.includes("hello") ||
-      msg.includes("hey")
-    ) {
-      return "Hello 👋 I'm Prince AI Assistant. Ask me about Prince's skills, projects, experience, tech stack, or contact details.";
+    if (!msg) return "Please enter a question. You can ask about skills, experience, projects, or contact details.";
+    if (/^(hi|hello|hey|good morning|good afternoon|good evening)$/.test(msg)) {
+      return "Hello! I'm Prince's portfolio assistant. Ask me about his development skills, work experience, projects, or how to get in touch.";
     }
-
-    // experience
-    if (
-      msg.includes("experience") ||
-      msg.includes("exp") ||
-      msg.includes("work")
-    ) {
-      return `Prince has 2+ years of experience as a Full-Stack Web Developer. He currently works at Xytron International developing enterprise systems using Laravel, ReactJS, MySQL, and modern web technologies.`;
+    if (has("experience", "work", "career", "employment", "job")) {
+      return "Prince is a Full-Stack Web Developer at Xytron International (MIS Department), working on enterprise web applications and internal systems. His experience also includes a Department of Agriculture OJT and leading the UPA rental platform thesis project.";
     }
-
-    // skills
-    if (
-      msg.includes("skill") ||
-      msg.includes("tech") ||
-      msg.includes("stack")
-    ) {
-      return `Prince specializes in Laravel, ReactJS, NodeJS, CodeIgniter, TailwindCSS, Bootstrap, MySQL, MongoDB, Firebase, and ExpressJS.`;
+    if (has("project", "projects", "portfolio", "system", "systems", "application", "applications")) {
+      return "Featured work includes RentSpace, MotoShop POS, HR Information System, Student Management System, Evacuation Center System, and Barangay Management System. Open the Projects section to review each project and its technology stack.";
     }
-
-    // frontend
-    if (
-      msg.includes("frontend") ||
-      msg.includes("front end") ||
-      msg.includes("ui")
-    ) {
-      return `Frontend technologies: ReactJS, HTML, CSS, JavaScript, TailwindCSS, and Bootstrap.`;
+    if (has("frontend", "front end", "interface", "ui", "design")) {
+      return "Frontend technologies include ReactJS, JavaScript, HTML, CSS, TailwindCSS, and Bootstrap. Prince also works with responsive interfaces and API integration.";
     }
-
-    // backend
-    if (
-      msg.includes("backend") ||
-      msg.includes("server")
-    ) {
-      return `Backend technologies: Laravel, PHP, NodeJS, ExpressJS, and CodeIgniter.`;
+    if (has("backend", "back end", "api", "server")) {
+      return "Backend technologies include PHP, Laravel, CodeIgniter, NodeJS, and ExpressJS, with experience building APIs, business workflows, and database-driven systems.";
     }
-
-    // node
-    if (
-      msg.includes("node") ||
-      msg.includes("express")
-    ) {
-      return `Prince also develops backend APIs using NodeJS and ExpressJS.`;
+    if (has("skill", "skills", "technology", "technologies", "tech", "stack")) {
+      return "Prince's stack includes PHP, JavaScript, Java, C, C#, Laravel, CodeIgniter, ReactJS, NodeJS, ExpressJS, React Native, MySQL, MongoDB, Firebase, Git, and Postman.";
     }
-
-    // react
-    if (
-      msg.includes("react")
-    ) {
-      return `Prince uses ReactJS and React Native for building modern web and mobile applications.`;
+    if (has("node", "nodejs", "express", "expressjs")) return "Prince also builds backend services and APIs using NodeJS and ExpressJS.";
+    if (has("laravel")) return "Laravel is one of Prince's primary backend frameworks, used for enterprise systems, application logic, and API development.";
+    if (has("react", "reactjs", "react native")) return "Prince uses ReactJS for web interfaces and React Native for mobile application development.";
+    if (has("resume", "cv")) return "Use the Download CV link in the Overview section to download Prince's resume. If the download does not start, check that the PDF exists at /files/princelouiepaquiado_resume.pdf in the deployed public folder.";
+    if (has("contact", "email", "phone", "hire", "freelance")) {
+      return "You can reach Prince at princepaquiado20@gmail.com or +63 992 418 3277. You can also use the contact form in the Contact section.";
     }
-
-    // laravel
-    if (
-      msg.includes("laravel")
-    ) {
-      return `Laravel is one of Prince's primary backend frameworks for enterprise systems and APIs.`;
-    }
-
-    // projects
-    if (
-      msg.includes("project") ||
-      msg.includes("system")
-    ) {
-      return `Featured projects include UPA Rental App, MotoShop POS, HRIS, Student Management System, Evacuation Center System, and Barangay Management System.`;
-    }
-
-    // resume
-    if (
-      msg.includes("resume") ||
-      msg.includes("cv")
-    ) {
-      return `You can download Prince's resume using the Download CV button in the Hero section.`;
-    }
-
-    // contact
-    if (
-      msg.includes("contact") ||
-      msg.includes("email") ||
-      msg.includes("phone")
-    ) {
-      return `You can contact Prince through email at princepaquiado20@gmail.com or phone number +63 992 418 3277.`;
-    }
-
-    // github
-    if (
-      msg.includes("github")
-    ) {
-      return `Github: https://github.com/princepaqs`;
-    }
-
-    // default
-    return `I'm still learning 🤖 Try asking about:
-- skills
-- experience
-- projects
-- Laravel
-- React
-- backend
-- frontend
-- contact`;
+    if (has("github")) return "GitHub profile: https://github.com/devprnc";
+    if (has("location", "where", "country")) return "Prince is based in the Philippines.";
+    return "I can help with questions about Prince's skills, frontend/backend stack, experience, projects, resume, GitHub, and contact details. Try asking a specific question.";
   };
 
   const sendMessage = (customText: string | null = null) => {
-    const finalMessage = customText || input;
-
-    if (!finalMessage.trim()) return;
-
-    const normalized = normalizeText(finalMessage);
-
-    const userMessage = {
-      sender: "user",
-      text: finalMessage,
-    };
-
-    const botMessage = {
-      sender: "bot",
-      text: getAIResponse(finalMessage),
-    };
+    const finalMessage = (customText ?? input).trim();
+    if (!finalMessage) return;
 
     setMessages((prev) => [
       ...prev,
-      userMessage,
-      botMessage,
+      { sender: "user", text: finalMessage },
+      { sender: "bot", text: getAIResponse(finalMessage) },
     ]);
-
-    // REDIRECT TO CONTACT PAGE
-    if (
-      normalized.includes("contact") ||
-      normalized.includes("email") ||
-      normalized.includes("phone")
-    ) {
-      setTimeout(() => {
-        window.location.href = "/#contact";
-      }, 500);
-    }
-
     setInput("");
   };
 
@@ -316,7 +204,7 @@ export default function App() {
       },
       {
         name: "MySQL",
-        icon: <SiMysql className="text-blue-500" />,
+        icon: <SiMysql className="text-emerald-400" />,
       },
     ],
     image: "/img/service2.jpg",
@@ -333,7 +221,7 @@ export default function App() {
       },
       {
         name: "MySQL",
-        icon: <SiMysql className="text-blue-500" />,
+        icon: <SiMysql className="text-emerald-400" />,
       },
     ],
     image: "/img/service3.jpg",
@@ -354,7 +242,7 @@ export default function App() {
       },
       {
         name: "MySQL",
-        icon: <SiMysql className="text-blue-500" />,
+        icon: <SiMysql className="text-emerald-400" />,
       },
     ],
     image: "/img/service4.jpg",
@@ -400,7 +288,7 @@ export default function App() {
       },
       {
         name: "MySQL",
-        icon: <SiMysql className="text-blue-500" />,
+        icon: <SiMysql className="text-emerald-400" />,
       },
     ],
     image: "/img/service6.jpg",
@@ -417,7 +305,7 @@ export default function App() {
       },
       {
         name: "CSS",
-        icon: <FaCss3Alt className="text-blue-500" />,
+        icon: <FaCss3Alt className="text-emerald-400" />,
       },
       {
         name: "JavaScript",
@@ -499,7 +387,7 @@ export default function App() {
       },
       {
         name: "C",
-        icon: <SiC className="text-blue-400" />,
+        icon: <SiC className="text-emerald-400" />,
       },
       {
         name: "C#",
@@ -513,7 +401,7 @@ export default function App() {
     skills: [
       {
         name: "MySQL",
-        icon: <SiMysql className="text-blue-500" />,
+        icon: <SiMysql className="text-emerald-400" />,
       },
       {
         name: "MongoDB",
@@ -576,7 +464,6 @@ export default function App() {
   },
 ];
 
-
 useEffect(() => {
   const sections =
     document.querySelectorAll(".fade-section");
@@ -608,12 +495,90 @@ useEffect(() => {
 }, []);
 
 
+  // const sendEmail = async (
+  //   e: React.FormEvent<HTMLFormElement>
+  // ) => {
+  //   e.preventDefault();
+
+  //   const form = e.currentTarget;
+
+  //   setSending(true);
+
+  //   const now = new Date();
+
+  //   const timestamp = now.toLocaleString("en-PH", {
+  //     year: "numeric",
+  //     month: "long",
+  //     day: "numeric",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //     second: "2-digit",
+  //   });
+
+  //   const existing =
+  //     form.querySelector('input[name="timestamp"]');
+
+  //   if (!existing) {
+  //     const time = document.createElement("input");
+
+  //     time.type = "hidden";
+  //     time.name = "timestamp";
+  //     time.value = timestamp;
+
+  //     form.appendChild(time);
+  //   }
+
+  //   try {
+  //     await emailjs.sendForm(
+  //       "service_j4xmz6e",
+  //       "template_cy5c77p",
+  //       form,
+  //       "MXcKRUXgUP_6ZMGBX"
+  //     );
+
+  //     setEmailStatus("success");
+
+  //     setEmailMessage(
+  //       "Your message has been sent successfully!"
+  //     );
+
+  //     setEmailModal(true);
+
+  //     form.reset();
+  //   } catch (error) {
+  //     console.log(error);
+
+  //     setEmailStatus("error");
+
+  //     setEmailMessage(
+  //       "Failed to send message. Please try again."
+  //     );
+
+  //     setEmailModal(true);
+  //   } finally {
+  //     setSending(false);
+  //   }
+  // };
+
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string | undefined;
+
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+  // new send email with captcha verification
   const sendEmail = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
 
     const form = e.currentTarget;
+
+    if (!captchaToken) {
+      setEmailStatus("error");
+      setEmailMessage("Please verify that you are not a robot.");
+      setEmailModal(true);
+      return;
+    }
 
     setSending(true);
 
@@ -628,29 +593,42 @@ useEffect(() => {
       second: "2-digit",
     });
 
-    const existing =
-      form.querySelector('input[name="timestamp"]');
-
-    if (!existing) {
-      const time = document.createElement("input");
-
-      time.type = "hidden";
-      time.name = "timestamp";
-      time.value = timestamp;
-
-      form.appendChild(time);
-    }
-
     try {
+      const existing = form.querySelector(
+        'input[name="timestamp"]'
+      );
+
+      let timestampInput = existing as HTMLInputElement | null;
+      if (!timestampInput) {
+        timestampInput = document.createElement("input");
+        timestampInput.type = "hidden";
+        timestampInput.name = "timestamp";
+        form.appendChild(timestampInput);
+      }
+      timestampInput.value = timestamp;
+
+      // Pass CAPTCHA token to EmailJS
+      let captchaInput = form.querySelector<HTMLInputElement>(
+        'input[name="g-recaptcha-response"]'
+      );
+
+      if (!captchaInput) {
+        captchaInput = document.createElement("input");
+        captchaInput.type = "hidden";
+        captchaInput.name = "g-recaptcha-response";
+        form.appendChild(captchaInput);
+      }
+
+      captchaInput.value = captchaToken;
+
       await emailjs.sendForm(
-        "service_j4xmz6e",
-        "template_cy5c77p",
+        import.meta.env.VITE_EMAILJS_SERVICE_ID || "service_j4xmz6e",
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "template_cy5c77p",
         form,
-        "MXcKRUXgUP_6ZMGBX"
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "MXcKRUXgUP_6ZMGBX"
       );
 
       setEmailStatus("success");
-
       setEmailMessage(
         "Your message has been sent successfully!"
       );
@@ -658,369 +636,165 @@ useEffect(() => {
       setEmailModal(true);
 
       form.reset();
+      setCaptchaToken(null);
+      recaptchaRef.current?.reset();
+
     } catch (error) {
       console.log(error);
 
       setEmailStatus("error");
-
       setEmailMessage(
         "Failed to send message. Please try again."
       );
 
       setEmailModal(true);
+
+      setCaptchaToken(null);
+      recaptchaRef.current?.reset();
+
     } finally {
       setSending(false);
     }
   };
 
+
   return (
     <div
-      className="
-        min-h-screen
-        overflow-x-hidden
-        text-slate-900
-        transition-all
-        duration-500
-
-        bg-[#f8fafc]
-        dark:bg-[#020617]
-        dark:text-white
-
-        bg-[linear-gradient(to_right,rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.04)_1px,transparent_1px)]
-        bg-[size:60px_60px]
-
-        dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)]
-        dark:bg-[size:60px_60px]
-      "
+      data-theme={darkMode ? "dark" : "light"}
+      className={`${darkMode ? "dark bg-[#080f1b] text-slate-100" : "light bg-slate-50 text-slate-900"} min-h-screen overflow-x-hidden font-sans selection:bg-emerald-400/30 transition-colors duration-300`}
     >
-      {/* Navbar */}
-      <nav
-        className="
-          fixed
-          top-0
-          left-0
-          right-0
-          z-50
-          border-b
-          border-black/5
-          bg-white/70
-          backdrop-blur-xl
-          dark:border-white/10
-          dark:bg-[#020617]/70
-        "
-      >
-        <div
-          className="
-            mx-auto
-            flex
-            max-w-6xl
-            items-center
-            justify-between
-            px-4
-            py-4
-            md:px-6
-          "
-        >
-          {/* LOGO */}
-          <a
-            href="#"
-            className="
-              text-base
+      <style>{`
+        html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+        section[id] { scroll-margin-top: 6.5rem; }
+        @media (max-width: 1023px) { section[id] { scroll-margin-top: 7.5rem; } }
+        section[id] > div:first-child h2::before { content: "// "; color: #10b981; opacity: .75; }
+        .light aside, .light header { background-color: rgba(255,255,255,.96) !important; border-color: #e2e8f0 !important; color: #334155 !important; }
+        .light [class*="bg-[#0b1220]"], .light [class*="bg-[#0b1625]"], .light [class*="bg-[#050b12]"], .light [class*="bg-[#0b1520]"], .light [class*="bg-slate-900"] { background-color: #ffffff !important; color: #0f172a !important; }
+        .light [class*="border-slate-800"], .light [class*="border-slate-700"] { border-color: #dbe4ee !important; }
+        .light [class*="text-white"], .light [class*="text-slate-100"], .light [class*="text-slate-200"], .light [class*="text-slate-300"] { color: #172033 !important; }
+        .light [class*="text-slate-400"], .light [class*="text-slate-500"], .light [class*="text-gray-400"], .light [class*="text-gray-500"] { color: #64748b !important; }
+        .light input, .light textarea { background-color: #fff !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
+        .light footer { background-color: #f1f5f9 !important; border-color: #dbe4ee !important; }
+        .light .terminal-window { background-color: #f8fafc !important; }
+      `}</style>
+      {/* Corporate dashboard sidebar */}
+      <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col border-r border-slate-800 bg-[#0b1220] text-slate-300 lg:flex">
+        <a href="#home" className="flex h-16 items-center gap-1 border-b border-slate-800 px-6 text-base
               font-bold
+              font-mono
               tracking-[0.2em]
-              md:text-lg
-            "
-          >
-            PL
-          </a>
+              md:text-lg">
+          <span className="text-emerald-400">&lt;</span>PL<span className="text-emerald-400">/&gt;</span>
 
-          {/* DESKTOP MENU */}
-          <div className="hidden items-center gap-6 md:flex">
+          <span>
+            <span className="block text-sm font-semibold tracking-wide text-white">
+              DEV PRINCE
+            </span>
+            <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-wider text-slate-500">
+              Developer Portfolio
+            </span>
+          </span>
+        </a>
+        <div className="px-5 pt-7 pb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">EXPLORER / WORKSPACE</div>
+        <nav className="flex flex-col gap-1 px-3">
           {[
-            "Home",
-            "About",
-            "Skills",
-            "Experience",
-            "Projects",
-            "Contact",
+            { label: "Overview", href: "#home", icon: "⌂" },
+            { label: "About Me", href: "#about", icon: "◉" },
+            { label: "Skills & Stack", href: "#skills", icon: "⌘" },
+            { label: "Experience", href: "#experience", icon: "▤" },
+            { label: "Projects", href: "#projects", icon: "▦" },
+            { label: "Contact", href: "#contact", icon: "✉" },
           ].map((item) => (
-            <a
-              key={item}
-              href={
-                item === "Home"
-                  ? "#"
-                  : `#${item.toLowerCase()}`
-              }
-              className="
-                relative
-                text-sm
-                font-medium
-                text-gray-600
-                transition-all
-                duration-300
-                hover:text-blue-500
-                dark:text-gray-300
-              "
-            >
-              {item}
-
-              <span
-                className="
-                  absolute
-                  -bottom-1
-                  left-0
-                  h-[2px]
-                  w-0
-                  bg-blue-500
-                  transition-all
-                  duration-300
-                  group-hover:w-full
-                "
-              />
+            <a key={item.label} href={item.href} onClick={() => setActiveSection(item.href.slice(1))} className={`group flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition ${activeSection === item.href.slice(1) ? "border border-emerald-400/20 bg-emerald-400/10 text-emerald-300" : "text-slate-400 hover:bg-slate-800/80 hover:text-white"}`}>
+              <span className="w-5 text-center font-mono text-base">{item.icon}</span>{item.label}
             </a>
           ))}
+        </nav>
+        <div className="mt-auto border-t border-slate-800 p-5">
+          <div className="flex items-center gap-3 rounded-xl bg-slate-900 p-3">
+            <span className="relative flex h-2.5 w-2.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40"/><span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"/></span>
+            <div><p className="font-mono text-xs font-medium text-emerald-300">● system_online</p><p className="mt-0.5 font-mono text-[10px] text-slate-500">status: available_for_work</p></div>
+          </div>
+          <p className="mt-4 text-[10px] text-slate-600">Dev Prince · © 2026 Prince Louie T. Paquiado</p>
+        </div>
+      </aside>
+
+      {/* Dashboard top bar */}
+      <header className="fixed left-0 right-0 top-0 z-40 border-b border-slate-800 bg-[#0b1220]/95 backdrop-blur-xl lg:left-64">
+        <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-400/30 bg-emerald-400/10 font-mono text-xs font-bold text-emerald-300 lg:hidden">&gt;_</span>
+            <button aria-label="Toggle navigation menu" aria-expanded={mobileMenu} onClick={() => setMobileMenu(!mobileMenu)} className="rounded-lg border border-slate-700 p-2 text-slate-300 lg:hidden"><Menu size={18}/></button>
+            <div><p className="text-xs text-slate-500">Developer Workspace</p><p className="text-sm font-semibold text-white">Portfolio Overview <span className="ml-1 font-mono text-emerald-400">~/dashboard</span></p></div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="hidden items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/5 px-3 py-1.5 text-[11px] text-emerald-300 sm:flex"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400"/> Available for work</span>
+            <a href="#contact" className="hidden rounded-lg bg-emerald-500 px-3.5 py-2 text-xs font-semibold transition hover:bg-emerald-400 sm:inline-flex">Let's Talk <ArrowUpRight size={14} className="ml-1"/></a>
+          </div>
+        </div>
+        {mobileMenu && <nav className="grid grid-cols-2 gap-2 border-t border-slate-800 bg-[#0b1220] p-4 sm:grid-cols-3 lg:hidden">{[["Overview","home"],["About","about"],["Skills","skills"],["Experience","experience"],["Projects","projects"],["Contact","contact"]].map(([label,id]) => <a key={id} href={`#${id}`} onClick={() => { setMobileMenu(false); setActiveSection(id); }} className="rounded-lg border border-slate-800 px-3 py-2.5 text-xs text-slate-300 hover:border-emerald-400/40 hover:text-emerald-300">{label}</a>)}</nav>}
+      </header>
+
+      <main className="min-h-screen pt-16 lg:pl-64">
+      {/* Dashboard overview */}
+      <section id="home" className="dashboard-section mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <div className="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <div><p className="font-mono text-xs text-emerald-400">// INITIALIZING DEVELOPER PROFILE...</p><h1 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">Developer Dashboard<span className="ml-2 font-mono text-emerald-500">_</span></h1><p className="mt-1 text-sm text-slate-400">A quick overview of my profile, capabilities, and selected work.</p></div>
+          <p className="font-mono text-[11px] text-slate-500">STATUS: <span className="text-emerald-400">ONLINE</span> · PHILIPPINES</p>
         </div>
 
-          {/* RIGHT SIDE */}
-          <div className="flex items-center gap-2">
-            {/* DARK MODE */}
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="
-                rounded-full
-                border
-                border-black/10
-                p-2
-                transition
-                hover:rotate-180
-                dark:border-white/10
-              "
-            >
-              {darkMode ? (
-                <Sun size={16} />
-              ) : (
-                <Moon size={16} />
-              )}
-            </button>
-
-            {/* MOBILE MENU BUTTON */}
-            <button
-              onClick={() => setMobileMenu(!mobileMenu)}
-              className="
-                flex
-                items-center
-                justify-center
-                rounded-full
-                border
-                border-black/10
-                p-2
-                md:hidden
-                dark:border-white/10
-              "
-            >
-              <Menu size={18} />
-            </button>
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(260px,0.8fr)]">
+          <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0b1220] shadow-xl shadow-black/10">
+            <div className="flex items-center justify-between border-b border-slate-800 px-5 py-3"><span className="font-mono text-[11px] text-slate-500">profile.tsx</span><span className="text-[10px] text-emerald-400">● ACTIVE PROFILE</span></div>
+            <div className="flex flex-col gap-6 p-5 sm:flex-row sm:items-center sm:p-7">
+              <div className="h-28 w-28 shrink-0 overflow-hidden rounded-2xl border border-emerald-400/30 bg-slate-900 p-1"><img src="/img/prince_profile.jpg" alt="Prince Louie" className="h-full w-full rounded-xl object-cover"/></div>
+              <div className="min-w-0"><p className="font-mono text-xs text-emerald-400"><span className="text-slate-500">const</span> developer <span className="text-slate-500">=</span> <span className="text-amber-300">"Dev Prince"</span><span className="text-slate-500">;</span></p><h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Prince Louie T. Paquiado</h2><p className="mt-2 text-sm font-medium text-emerald-300">Full-Stack Web Developer</p><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">Building reliable web applications, enterprise systems, and user-focused digital solutions with modern technologies.</p>
+                <div className="mt-5 flex flex-wrap gap-2"><a href="#projects" className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-xs font-semibold text-slate-950 transition hover:bg-emerald-400">Explore Projects <ArrowRight size={14}/></a><a href="/files/princelouiepaquiado_resume.pdf" download="princelouiepaquiado_resume.pdf" className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-4 py-2.5 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/50 hover:text-emerald-300">Download CV <Download size={14}/></a></div>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-1">
+            <div className="rounded-2xl border border-slate-800 bg-[#0b1220] p-5"><p className="text-[11px] uppercase tracking-wider text-slate-500">Core Focus</p><p className="mt-3 text-lg font-semibold text-white">Full-Stack</p><p className="mt-1 text-xs text-slate-400">Web application development</p></div>
+            <div className="rounded-2xl border border-slate-800 bg-[#0b1220] p-5"><p className="text-[11px] uppercase tracking-wider text-slate-500">Primary Stack</p><p className="mt-3 text-lg font-semibold text-white">Laravel · React</p><p className="mt-1 text-xs text-slate-400">Backend & frontend engineering</p></div>
           </div>
         </div>
 
-        {/* MOBILE MENU */}
-        <div
-          className={`
-            overflow-hidden
-            transition-all
-            duration-300
-            md:hidden
-
-            ${
-              mobileMenu
-                ? "max-h-[400px] opacity-100"
-                : "max-h-0 opacity-0"
-            }
-          `}
-        >
-          <div
-            className="
-              flex
-              flex-col
-              gap-1
-              border-t
-              border-black/5
-              bg-white/90
-              px-4
-              py-4
-              backdrop-blur-xl
-              dark:border-white/10
-              dark:bg-[#020617]/90
-            "
-          >
-            {[
-              "About",
-              "Skills",
-              "Experience",
-              "Projects",
-              "Contact",
-            ].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                onClick={() => setMobileMenu(false)}
-                className="
-                  rounded-xl
-                  px-4
-                  py-3
-                  text-sm
-                  font-medium
-                  text-gray-700
-                  transition
-                  hover:bg-black/5
-                  hover:text-blue-500
-                  dark:text-gray-200
-                  dark:hover:bg-white/5
-                "
-              >
-                {item}
-              </a>
-            ))}
-          </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {[["03+","Years in Development","▤"],["06+","Featured Projects","▦"],["10+","Technologies & Tools","⌘"],["2025","Best in Thesis Award","✦"]].map(([value,label,icon]) => <div key={label} className="rounded-xl border border-slate-800 bg-[#0b1220] p-5"><div className="flex items-center justify-between"><span className="text-[11px] uppercase tracking-wider text-slate-500">{label}</span><span className="font-mono text-lg text-emerald-400">{icon}</span></div><p className="mt-3 font-mono text-2xl font-bold text-white">{value}</p></div>)}
         </div>
-      </nav>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-[#0b1220] px-5 py-4"><div><p className="text-sm font-semibold text-white">Connect with me</p><p className="mt-1 text-xs text-slate-500">Find my work and professional profile online.</p></div><div className="flex gap-2"><a href="https://github.com/devprnc" target="_blank" rel="noreferrer" aria-label="GitHub" className="rounded-lg border border-slate-700 p-2.5 text-slate-300 hover:border-emerald-400/50 hover:text-emerald-300"><Github size={17}/></a><a href="https://www.linkedin.com/in/prince-louie-paquiado-4748b0326/" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="rounded-lg border border-slate-700 p-2.5 text-slate-300 hover:border-emerald-400/50 hover:text-emerald-300"><Linkedin size={17}/></a><a href="#contact" aria-label="Email" className="rounded-lg border border-slate-700 p-2.5 text-slate-300 hover:border-emerald-400/50 hover:text-emerald-300"><Mail size={17}/></a></div></div>
 
-      {/* Hero */}
-      <section className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 text-center">
-        <div className="mb-6">
-          <div
-            className="
-              relative
-              mx-auto
-              h-36
-              w-36
-              overflow-hidden
-              rounded-full
-              border border-black/10
-              bg-white
-              p-1
-              shadow-xl
-              dark:border-white/10
-              dark:bg-[#111827]
-            "
-          >
-            <img
-              src="/img/prince_profile.jpg"
-              alt="Prince Louie"
-              className="h-full w-full rounded-full object-cover"
-            />
+        <div className="mt-5 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="terminal-window overflow-hidden rounded-xl border border-emerald-400/20 bg-[#050b12] shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
+            <div className="flex items-center justify-between border-b border-slate-800 bg-[#0b1520] px-4 py-3">
+              <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-red-400/80"/><span className="h-2.5 w-2.5 rounded-full bg-amber-400/80"/><span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80"/><span className="ml-2 font-mono text-[10px] text-slate-500">terminal — bash</span></div>
+              <span className="font-mono text-[10px] text-emerald-400">SESSION: ACTIVE</span>
+            </div>
+            <div className="space-y-2 p-4 font-mono text-xs leading-6 sm:p-5">
+              <p><span className="text-emerald-400">prince@developer</span><span className="text-slate-500">:</span><span className="text-cyan-300">~</span><span className="text-slate-300">$ whoami</span></p>
+              <p className="pl-3 text-slate-300">Full-Stack Web Developer <span className="text-slate-500">// Philippines</span></p>
+              <p><span className="text-emerald-400">prince@developer</span><span className="text-slate-500">:</span><span className="text-cyan-300">~</span><span className="text-slate-300">$ cat stack.json</span></p>
+              <p className="pl-3"><span className="text-slate-500">{`{`}</span> <span className="text-cyan-300">"frontend"</span><span className="text-slate-400">: </span><span className="text-amber-300">["React", "Tailwind"]</span><span className="text-slate-500">,</span></p>
+              <p className="pl-6"><span className="text-cyan-300">"backend"</span><span className="text-slate-400">: </span><span className="text-amber-300">["Laravel", "Node.js"]</span><span className="text-slate-500">,</span></p>
+              <p className="pl-6"><span className="text-cyan-300">"database"</span><span className="text-slate-400">: </span><span className="text-amber-300">["MySQL", "MongoDB"]</span></p>
+              <p className="pl-3 text-slate-500">{`}`}</p>
+              <p className="pt-1"><span className="text-emerald-400">prince@developer</span><span className="text-slate-500">:</span><span className="text-cyan-300">~</span><span className="text-slate-300">$ <span className="animate-pulse text-emerald-400">▌</span></span></p>
+            </div>
           </div>
-        </div>
-
-        <h1 className="animate-title text-4xl font-extrabold md:text-6xl">
-          PRINCE LOUIE T. PAQUIADO
-        </h1>
-
-        <p className="mt-4 text-base text-gray-600 dark:text-gray-300">
-          <span className="typing-animation font-medium">
-            Full-Stack Web Developer
-          </span>
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a
-            href="#projects"
-            className="
-              flex items-center gap-2
-              rounded-xl
-              bg-blue-500
-              px-5 py-2.5
-              text-sm font-medium
-              text-white
-              transition
-              hover:bg-blue-600
-            "
-          >
-            View Projects
-            <ArrowRight size={16} />
-          </a>
-
-          <a
-            href="/files/princelouiepaquiado_resume.pdf"
-            download="princelouiepaquiado_resume.pdf"
-            className="
-              flex items-center gap-2
-              rounded-xl
-              border border-gray-300
-              px-5 py-2.5
-              text-sm font-medium
-              transition
-              hover:bg-gray-100
-              dark:border-gray-700
-              dark:hover:bg-gray-800
-            "
-          >
-            Download CV
-            <Download size={16} />
-          </a>
-                  </div>
-
-        <div className="mt-8 flex gap-4">
-          <a
-            href="https://github.com/devprnc"
-            target="_blank"
-            rel="noreferrer"
-            className="
-              rounded-full
-              border border-gray-300
-              p-2.5
-              transition-all
-              hover:-translate-y-1
-              hover:border-blue-500
-              hover:text-blue-500
-              dark:border-gray-700
-            "
-          >
-            <Github size={18} />
-          </a>
-
-          <a
-            href="https://www.linkedin.com/in/prince-louie-paquiado-4748b0326/"
-            target="_blank"
-            rel="noreferrer"
-            className="
-              rounded-full
-              border border-gray-300
-              p-2.5
-              transition-all
-              hover:-translate-y-1
-              hover:border-blue-500
-              hover:text-blue-500
-              dark:border-gray-700
-            "
-          >
-            <Linkedin size={18} />
-          </a>
-
-          <a
-            href="#contact"
-            className="
-              rounded-full
-              border border-gray-300
-              p-2.5
-              transition-all
-              hover:-translate-y-1
-              hover:border-blue-500
-              hover:text-blue-500
-              dark:border-gray-700
-            "
-          >
-            <Mail size={18} />
-          </a>
+          <div className="overflow-hidden rounded-xl border border-slate-800 bg-[#0b1220]">
+            <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3"><span className="font-mono text-[10px] text-slate-400">developer.prompt</span><span className="rounded border border-emerald-400/20 bg-emerald-400/5 px-2 py-1 font-mono text-[9px] text-emerald-300">READY</span></div>
+            <div className="p-4 sm:p-5"><p className="font-mono text-xs text-emerald-400">// BUILD • DEBUG • DEPLOY</p><h3 className="mt-3 text-lg font-semibold text-white">Turning ideas into working software.</h3><p className="mt-2 text-xs leading-6 text-slate-400">From database design to responsive interfaces, I build practical applications with clean logic and maintainable code.</p><div className="mt-4 flex flex-wrap gap-2">{["API Integration", "System Development", "UI Engineering", "Database Design"].map((tag) => <span key={tag} className="rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 font-mono text-[10px] text-slate-300"><span className="mr-1 text-emerald-400">#</span>{tag}</span>)}</div></div>
+          </div>
         </div>
       </section>
 
       {/* About */}
       <section
         id="about"
-        className="fade-section mx-auto max-w-5xl px-6 py-20"
+        className="fade-section mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"
       >
         <div className="mb-10">
-          <h2 className="animate-heading text-3xl font-bold md:text-4xl">
+          <h2 className="font-mono text-2xl font-bold tracking-tight text-emerald-300 md:text-3xl">
             About Me
           </h2>
         </div>
@@ -1028,18 +802,18 @@ useEffect(() => {
         <div
           className="
             rounded-3xl
-            border border-black/5
-            bg-white/70
+            border border-slate-800
+            bg-[#0b1220]
             p-7
-            shadow-lg
+            shadow-xl shadow-black/20
             backdrop-blur-xl
-            dark:border-white/10
-            dark:bg-white/5
+            dark:border-slate-800
+            dark:bg-[#0b1220]
           "
         >
-          <p className="text-sm leading-8 text-gray-600 dark:text-gray-300">
+          <p className="text-sm leading-8 text-slate-400">
             I am{" "}
-            <span className="font-semibold text-blue-500">
+            <span className="font-semibold text-emerald-400">
               Prince Louie T. Paquiado
             </span>
             , a Full-Stack Web Developer with more than 3 years of experience developing
@@ -1049,9 +823,9 @@ useEffect(() => {
             CSS, and JavaScript.
           </p>
 
-          <p className="mt-5 text-sm leading-8 text-gray-600 dark:text-gray-300">
+          <p className="mt-5 text-sm leading-8 text-slate-400">
             Currently, I work at{" "}
-            <span className="font-semibold text-blue-500">
+            <span className="font-semibold text-emerald-400">
               Xytron International
             </span>{" "}
             as a Full-Stack Web Developer in the MIS Department, where I develop
@@ -1062,10 +836,10 @@ useEffect(() => {
             , Ticketing Management System (TMS) using Laravel and modern web technologies.
           </p>
 
-          <p className="mt-5 text-sm leading-8 text-gray-600 dark:text-gray-300">
+          <p className="mt-5 text-sm leading-8 text-slate-400">
             I graduated with a Bachelor of Science in Computer Science (BSCS)
             from the University of Caloocan City and received the{" "}
-            <span className="font-semibold text-blue-500">
+            <span className="font-semibold text-emerald-400">
               Best in Thesis Award
             </span>{" "}
             in 2025 for developing the UPA (Urban Property Rental Application),
@@ -1084,12 +858,12 @@ useEffect(() => {
                 key={index}
                 className="
                   rounded-full
-                  border border-blue-500/20
-                  bg-blue-500/10
+                  border border-emerald-400/20
+                  bg-emerald-500/10
                   px-4 py-2
                   text-xs
                   font-medium
-                  text-blue-500
+                  text-emerald-400
                 "
               >
                 {item}
@@ -1100,13 +874,13 @@ useEffect(() => {
       </section>
 
       {/* Skills */}
-      <section id="skills" className="fade-section mx-auto max-w-5xl px-6 py-20">
-        <div className="mb-10 text-center">
-          <h2 className="animate-heading text-3xl font-bold md:text-4xl">
+      <section id="skills" className="dashboard-section fade-section mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-7">
+          <h2 className="font-mono text-2xl font-bold tracking-tight text-emerald-300 md:text-3xl">
             Skills & Tech Stack
           </h2>
 
-          <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+          <p className="mt-3 text-sm text-slate-400">
             Technologies and tools I use for development
           </p>
         </div>
@@ -1117,16 +891,16 @@ useEffect(() => {
               key={index}
               className="
                 rounded-2xl
-                border border-black/5
-                bg-white/70
+                border border-slate-800
+                bg-[#0b1220]
                 p-5
                 shadow-lg
                 backdrop-blur-xl
                 transition-all
                 duration-300
                 hover:-translate-y-1
-                dark:border-white/10
-                dark:bg-white/5
+                dark:border-slate-800
+                dark:bg-[#0b1220]
               "
             >
               <h3 className="mb-4 text-base font-semibold">
@@ -1142,7 +916,7 @@ useEffect(() => {
                       rounded-xl
                       border border-white/10
                       bg-black/5
-                      dark:bg-white/5
+                      dark:bg-[#0b1625]/90
                       px-3 py-2
                       text-sm
                       font-medium
@@ -1151,14 +925,14 @@ useEffect(() => {
                       duration-300
                       hover:-translate-y-1
                       hover:scale-105
-                      hover:border-blue-500/30
+                      hover:border-emerald-400/30
                     "
                   >
                     <span className="text-xl">
                       {skill.icon}
                     </span>
 
-                    <span className="text-gray-700 dark:text-gray-200">
+                    <span className="text-slate-200">
                       {skill.name}
                     </span>
                   </div>
@@ -1170,9 +944,9 @@ useEffect(() => {
       </section>
 
       {/* Experience */}
-      <section id="experience" className="fade-section mx-auto max-w-5xl px-6 py-20">
-        <div className="mb-10 text-center">
-          <h2 className="animate-heading text-3xl font-bold md:text-4xl">
+      <section id="experience" className="dashboard-section fade-section mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-7">
+          <h2 className="font-mono text-2xl font-bold tracking-tight text-emerald-300 md:text-3xl">
             Experience
           </h2>
         </div>
@@ -1183,13 +957,13 @@ useEffect(() => {
               key={index}
               className="
                 rounded-3xl
-                border border-black/5
-                bg-white/70
+                border border-slate-800
+                bg-[#0b1220]
                 p-6
                 shadow-lg
                 backdrop-blur-xl
-                dark:border-white/10
-                dark:bg-white/5
+                dark:border-slate-800
+                dark:bg-[#0b1220]
               "
             >
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -1213,17 +987,17 @@ useEffect(() => {
                     )}
                   </div>
 
-                  <p className="mt-1 text-sm text-blue-500">
+                  <p className="mt-1 text-sm text-emerald-400">
                     {exp.company}
                   </p>
                 </div>
 
-                <div className="text-xs text-gray-500 dark:text-gray-400">
+                <div className="text-xs text-slate-500">
                   {exp.year}
                 </div>
               </div>
 
-              <p className="mt-5 text-sm leading-7 text-gray-600 dark:text-gray-300">
+              <p className="mt-5 text-sm leading-7 text-slate-400">
                 {exp.description}
               </p>
             </div>
@@ -1232,13 +1006,13 @@ useEffect(() => {
       </section>
 
       {/* Projects */}
-      <section id="projects" className="fade-section mx-auto max-w-5xl px-6 py-20">
-        <div className="mb-10 text-center">
-          <h2 className="animate-heading text-3xl font-bold md:text-4xl">
+      <section id="projects" className="dashboard-section fade-section mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-7">
+          <h2 className="font-mono text-2xl font-bold tracking-tight text-emerald-300 md:text-3xl">
             Featured Projects
           </h2>
 
-          <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+          <p className="mt-3 text-sm text-slate-400">
             Some systems and applications I developed
           </p>
         </div>
@@ -1247,16 +1021,18 @@ useEffect(() => {
         {projects.map((project, index) => (
           <a
             key={index}
-            href={project.link}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={project.link || "#projects"}
+            target={project.link ? "_blank" : undefined}
+            rel={project.link ? "noopener noreferrer" : undefined}
+            aria-disabled={!project.link}
+            onClick={(event) => { if (!project.link) event.preventDefault(); }}
             className="
               group
               relative
               overflow-hidden
               rounded-[28px]
               border border-gray-200
-              bg-white/70
+              bg-[#0b1625]/90
               shadow-xl
               backdrop-blur-xl
               transition-all duration-500
@@ -1264,8 +1040,8 @@ useEffect(() => {
               hover:scale-[1.02]
               hover:shadow-[0_0_60px_rgba(59,130,246,0.25)]
               active:scale-[0.98]
-              dark:border-white/10
-              dark:bg-white/5
+              dark:border-emerald-400/15
+              dark:bg-[#0b1625]/90
             "
           >
             {/* IMAGE */}
@@ -1302,7 +1078,7 @@ useEffect(() => {
                   backdrop-blur-md
                   transition-all duration-300
                   group-hover:rotate-45
-                  group-hover:bg-white
+                  group-hover:bg-[#0b1625]
                 "
               >
                 <ArrowUpRight
@@ -1321,7 +1097,7 @@ useEffect(() => {
 
             {/* CONTENT */}
             <div className="p-6">
-              <p className="mb-6 text-sm leading-7 text-gray-600 dark:text-gray-300">
+              <p className="mb-6 text-sm leading-7 text-slate-400">
                 {project.description}
               </p>
 
@@ -1335,19 +1111,19 @@ useEffect(() => {
                       rounded-full
                       border border-gray-200
                       bg-black/[0.03]
-                      dark:bg-white/5
+                      dark:bg-[#0b1625]/90
                       px-3 py-1.5
                       text-xs font-medium
                       backdrop-blur-md
                       transition-all duration-300
                       hover:scale-105
-                      hover:border-blue-400
-                      hover:bg-blue-500/10
+                      hover:border-emerald-400
+                      hover:bg-emerald-500/10
                     "
                   >
                     <span className="text-base">{tech.icon}</span>
 
-                    <span className="text-gray-700 dark:text-gray-200">
+                    <span className="text-slate-200">
                       {tech.name}
                     </span>
                   </div>
@@ -1360,15 +1136,15 @@ useEffect(() => {
       </section>
 
       {/* Contact */}
-      <section id="contact" className="mx-auto max-w-5xl px-6 py-24">
+      <section id="contact" className="dashboard-section mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Left Side */}
         <div>
-          <h2 className="animate-heading text-3xl font-bold md:text-4xl">
+          <h2 className="font-mono text-2xl font-bold tracking-tight text-emerald-300 md:text-3xl">
             LET&apos;S TALK!
           </h2>
 
-          <p className="mt-5 text-sm leading-7 text-gray-600 dark:text-gray-300">
+          <p className="mt-5 text-sm leading-7 text-slate-400">
             Feel free to contact me for freelance projects,
             collaborations, internships, or full-time opportunities.
           </p>
@@ -1392,20 +1168,20 @@ useEffect(() => {
                 key={index}
                 className="
                   rounded-2xl
-                  border border-black/5
-                  bg-white/70
+                  border border-emerald-400/15
+                  bg-[#0b1625]/90
                   p-4
                   backdrop-blur-xl
-                  dark:border-white/10
-                  dark:bg-white/5
+                  dark:border-emerald-400/15
+                  dark:bg-[#0b1625]/90
                 "
               >
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-slate-500">
                   {item.label}
                 </p>
 
-                <h3 className="mt-1 text-sm font-semibold">
-                  {item.value}
+                <h3 className="mt-1 break-all text-sm font-semibold">
+                  {item.label === "Email" ? <a href={`mailto:${item.value}`} className="hover:text-emerald-400">{item.value}</a> : item.label === "Phone" ? <a href={`tel:${item.value.replace(/\s/g, "")}`} className="hover:text-emerald-400">{item.value}</a> : <a href="https://github.com/devprnc" target="_blank" rel="noreferrer" className="hover:text-emerald-400">{item.value}</a>}
                 </h3>
               </div>
             ))}
@@ -1416,13 +1192,13 @@ useEffect(() => {
         <div
           className="
             rounded-3xl
-            border border-black/5
-            bg-white/70
+            border border-slate-800
+            bg-[#0b1220]
             p-6
-            shadow-lg
+            shadow-xl shadow-black/20
             backdrop-blur-xl
-            dark:border-white/10
-            dark:bg-white/5
+            dark:border-slate-800
+            dark:bg-[#0b1220]
           "
         >
           <div
@@ -1431,8 +1207,8 @@ useEffect(() => {
               flex h-14 w-14
               items-center justify-center
               rounded-full
-              bg-blue-500/10
-              text-blue-500
+              bg-emerald-500/10
+              text-emerald-400
             "
           >
             <Mail size={28} />
@@ -1440,7 +1216,7 @@ useEffect(() => {
 
           <h3 className="text-xl font-bold">Send Message</h3>
 
-          <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300">
+          <p className="mt-3 text-sm leading-7 text-slate-400">
             Send me a message directly through the contact form.
           </p>
 
@@ -1456,15 +1232,15 @@ useEffect(() => {
                 required
                 className="
                   w-full rounded-2xl
-                  border border-black/10
-                  bg-white/70
+                  border border-emerald-400/20
+                  bg-[#0b1625]/90
                   px-4 py-3
                   text-sm
                   outline-none
                   transition
-                  focus:border-blue-500
-                  dark:border-white/10
-                  dark:bg-white/5
+                  focus:border-emerald-400
+                  dark:border-emerald-400/15
+                  dark:bg-[#0b1625]/90
                 "
               />
             </div>
@@ -1477,15 +1253,15 @@ useEffect(() => {
                 required
                 className="
                   w-full rounded-2xl
-                  border border-black/10
-                  bg-white/70
+                  border border-emerald-400/20
+                  bg-[#0b1625]/90
                   px-4 py-3
                   text-sm
                   outline-none
                   transition
-                  focus:border-blue-500
-                  dark:border-white/10
-                  dark:bg-white/5
+                  focus:border-emerald-400
+                  dark:border-emerald-400/15
+                  dark:bg-[#0b1625]/90
                 "
               />
             </div>
@@ -1498,15 +1274,15 @@ useEffect(() => {
                 required
                 className="
                   w-full rounded-2xl
-                  border border-black/10
-                  bg-white/70
+                  border border-emerald-400/20
+                  bg-[#0b1625]/90
                   px-4 py-3
                   text-sm
                   outline-none
                   transition
-                  focus:border-blue-500
-                  dark:border-white/10
-                  dark:bg-white/5
+                  focus:border-emerald-400
+                  dark:border-emerald-400/15
+                  dark:bg-[#0b1625]/90
                 "
               />
             </div>
@@ -1519,30 +1295,47 @@ useEffect(() => {
                 required
                 className="
                   w-full resize-none rounded-2xl
-                  border border-black/10
-                  bg-white/70
+                  border border-emerald-400/20
+                  bg-[#0b1625]/90
                   px-4 py-3
                   text-sm
                   outline-none
                   transition
-                  focus:border-blue-500
-                  dark:border-white/10
-                  dark:bg-white/5
+                  focus:border-emerald-400
+                  dark:border-emerald-400/15
+                  dark:bg-[#0b1625]/90
                 "
               />
             </div>
+            
+            {/* GOOGLE RECAPTCHA */}
+            <div className="flex justify-center py-2">
+              {recaptchaSiteKey ? (
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={recaptchaSiteKey}
+                  onChange={(token) => setCaptchaToken(token)}
+                  onExpired={() => setCaptchaToken(null)}
+                  onErrored={() => setCaptchaToken(null)}
+                />
+              ) : (
+                <p className="text-center text-xs text-amber-400">reCAPTCHA is not configured. Set VITE_RECAPTCHA_SITE_KEY in your environment.</p>
+              )}
+            </div>
+
 
             <button
               type="submit"
-              disabled={sending}
+              disabled={sending || !captchaToken || !recaptchaSiteKey}
               className="
+                cursor-pointer
                 flex
                 w-full
                 items-center
                 justify-center
                 gap-2
                 rounded-2xl
-                bg-blue-600
+                bg-emerald-500
                 px-6
                 py-3
                 text-sm
@@ -1550,7 +1343,7 @@ useEffect(() => {
                 text-white
                 transition-all
                 hover:-translate-y-1
-                hover:bg-blue-700
+                hover:bg-emerald-600
                 disabled:cursor-not-allowed
                 disabled:opacity-70
               "
@@ -1582,12 +1375,12 @@ useEffect(() => {
           text-center
           text-xs
           text-gray-500
-          border-b border-black/5 dark:border-white/10
-          bg-white/70 dark:bg-[#020617]/70
+          border-b border-emerald-400/15 dark:border-emerald-400/15
+          bg-white/5 dark:bg-[#050b14]/70
           backdrop-blur-xl
         "
       >
-        © 2026 Prince Louie T. Paquiado. All rights reserved.
+        Dev Prince · © 2026 Prince Louie T. Paquiado. All rights reserved.
       </footer>
       {/* EMAIL STATUS MODAL */}
 {emailModal && (
@@ -1605,7 +1398,7 @@ useEffect(() => {
         w-full max-w-md
         rounded-3xl
         border border-white/10
-        bg-white
+        bg-[#0b1625]
         p-6
         shadow-2xl
         dark:bg-[#0f172a]
@@ -1656,14 +1449,14 @@ useEffect(() => {
           mt-6
           w-full
           rounded-2xl
-          bg-blue-600
+          bg-emerald-500
           px-5
           py-3
           text-sm
           font-semibold
           text-white
           transition
-          hover:bg-blue-700
+          hover:bg-emerald-600
         "
       >
         Close
@@ -1671,6 +1464,8 @@ useEffect(() => {
     </div>
   </div>
 )}
+
+      </main>
 
       {/* CHATBOT */}
       <div className="fixed bottom-6 right-6 z-[999]">
@@ -1683,7 +1478,7 @@ useEffect(() => {
               items-center
               gap-3
               rounded-full
-              bg-blue-500
+              bg-emerald-500
               px-5
               py-4
               text-white
@@ -1691,7 +1486,7 @@ useEffect(() => {
               transition-all
               duration-300
               hover:scale-105
-              hover:bg-blue-600
+              hover:bg-emerald-400
             "
           >
             <span className="text-sm font-semibold">
@@ -1705,15 +1500,15 @@ useEffect(() => {
             className="
               flex
               h-[620px]
-              w-[360px]
+              w-[min(360px,calc(100vw-2rem))]
               flex-col
               overflow-hidden
               rounded-3xl
               border
-              border-black/10
-              bg-white
+              border-emerald-400/20
+              bg-[#0b1625]
               shadow-[0_20px_80px_rgba(0,0,0,0.25)]
-              dark:border-white/10
+              dark:border-emerald-400/15
               dark:bg-[#0f172a]
             "
           >
@@ -1724,12 +1519,12 @@ useEffect(() => {
                 items-center
                 justify-between
                 border-b
-                border-black/10
-                bg-blue-500
+                border-emerald-400/20
+                bg-emerald-500
                 px-5
                 py-4
                 text-white
-                dark:border-white/10
+                dark:border-emerald-400/15
               "
             >
               <div className="flex items-center gap-3">
@@ -1752,13 +1547,14 @@ useEffect(() => {
                     Prince AI Assistant
                   </h3>
 
-                  <p className="text-xs text-blue-100">
+                  <p className="text-xs text-emerald-100">
                     Online
                   </p>
                 </div>
               </div>
 
               <button
+                aria-label="Close chat assistant"
                 onClick={() => setChatOpen(false)}
                 className="
                   rounded-full
@@ -1779,7 +1575,7 @@ useEffect(() => {
                 overflow-y-auto
                 bg-slate-50
                 p-4
-                dark:bg-[#020617]
+                dark:bg-[#050b14]
               "
             >
               {messages.map((msg, index) => (
@@ -1803,8 +1599,8 @@ useEffect(() => {
 
                       ${
                         msg.sender === "user"
-                          ? "bg-blue-500 text-white"
-                          : "bg-white text-gray-700 dark:bg-white/10 dark:text-gray-200"
+                          ? "bg-emerald-500 text-white"
+                          : "bg-[#0b1625] text-gray-700 dark:bg-white/10 dark:text-gray-200"
                       }
                     `}
                   >
@@ -1820,9 +1616,9 @@ useEffect(() => {
               className="
                 relative
                 border-t
-                border-black/5
-                dark:border-white/10
-                bg-white
+                border-emerald-400/15
+                dark:border-emerald-400/15
+                bg-[#0b1625]
                 dark:bg-[#0f172a]
                 pt-6
               "
@@ -1845,17 +1641,17 @@ useEffect(() => {
                   justify-center
                   rounded-full
                   border
-                  border-black/10
-                  bg-white
+                  border-emerald-400/20
+                  bg-[#0b1625]
                   text-gray-700
                   shadow-xl
                   transition-all
                   duration-300
                   hover:scale-110
-                  hover:bg-blue-500
+                  hover:bg-emerald-500
                   hover:text-white
-                  dark:border-white/10
-                  dark:bg-[#1e293b]
+                  dark:border-emerald-400/15
+                  dark:bg-[#0b1625]
                   dark:text-white
                 "
               >
@@ -1896,14 +1692,14 @@ useEffect(() => {
                       onClick={() => sendMessage(item)}
                       className="
                         rounded-full
-                        bg-blue-500/10
+                        bg-emerald-500/10
                         px-3
                         py-1.5
                         text-xs
                         font-medium
-                        text-blue-500
+                        text-emerald-400
                         transition
-                        hover:bg-blue-500
+                        hover:bg-emerald-500
                         hover:text-white
                       "
                     >
@@ -1920,9 +1716,9 @@ useEffect(() => {
                 items-center
                 gap-3
                 border-t
-                border-black/10
+                border-emerald-400/20
                 p-4
-                dark:border-white/10
+                dark:border-emerald-400/15
               "
             >
               <input
@@ -1937,21 +1733,24 @@ useEffect(() => {
                   flex-1
                   rounded-2xl
                   border
-                  border-gray-300
-                  bg-white
+                  border-emerald-400/20
+                  bg-[#0b1625]
                   px-4
                   py-3
                   text-sm
                   outline-none
                   transition
-                  focus:border-blue-500
-                  dark:border-white/10
-                  dark:bg-[#1e293b]
+                  focus:border-emerald-400
+                  dark:border-emerald-400/15
+                  dark:bg-[#0b1625]
                   dark:text-white
                 "
               />
 
               <button
+                type="button"
+                aria-label="Send message"
+                disabled={!input.trim()}
                 onClick={() => sendMessage()}
                 className="
                   flex
@@ -1960,10 +1759,10 @@ useEffect(() => {
                   items-center
                   justify-center
                   rounded-2xl
-                  bg-blue-500
+                  bg-emerald-500
                   text-white
                   transition
-                  hover:bg-blue-600
+                  hover:bg-emerald-400
                 "
               >
                 <Send size={18} />
