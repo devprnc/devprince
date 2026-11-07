@@ -17,6 +17,10 @@ import {
   Loader2,
   Sun,
   Moon,
+  Trophy,
+  CalendarDays,
+  FolderKanban,
+  Code2,
 } from "lucide-react";
 
 import {
@@ -761,7 +765,28 @@ useEffect(() => {
         </div>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[["03+","Years in Development","▤"],["06+","Featured Projects","▦"],["10+","Technologies & Tools","⌘"],["2025","Best in Thesis Award","✦"]].map(([value,label,icon]) => <div key={label} className="rounded-xl border border-slate-800 bg-[#0b1220] p-5"><div className="flex items-center justify-between"><span className="text-[11px] uppercase tracking-wider text-slate-500">{label}</span><span className="font-mono text-lg text-emerald-400">{icon}</span></div><p className="mt-3 font-mono text-2xl font-bold text-white">{value}</p></div>)}
+          {[
+            ["03+", "Years in Development", CalendarDays],
+            ["06+", "Featured Projects", FolderKanban],
+            ["10+", "Technologies & Tools", Code2],
+            ["2025", "Best in Thesis Award", Trophy],
+          ].map(([value, label, Icon]) => (
+            <div
+              key={label}
+              className="rounded-xl border border-slate-800 bg-[#0b1220] p-5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] uppercase tracking-wider text-slate-500">
+                  {label}
+                </span>
+                <Icon size={18} className="text-emerald-400" />
+              </div>
+
+              <p className="mt-3 font-mono text-2xl font-bold text-white">
+                {value}
+              </p>
+            </div>
+          ))}
         </div>
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-[#0b1220] px-5 py-4"><div><p className="text-sm font-semibold text-white">Connect with me</p><p className="mt-1 text-xs text-slate-500">Find my work and professional profile online.</p></div><div className="flex gap-2"><a href="https://github.com/devprnc" target="_blank" rel="noreferrer" aria-label="GitHub" className="rounded-lg border border-slate-700 p-2.5 text-slate-300 hover:border-emerald-400/50 hover:text-emerald-300"><Github size={17}/></a><a href="https://www.linkedin.com/in/prince-louie-paquiado-4748b0326/" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="rounded-lg border border-slate-700 p-2.5 text-slate-300 hover:border-emerald-400/50 hover:text-emerald-300"><Linkedin size={17}/></a><a href="#contact" aria-label="Email" className="rounded-lg border border-slate-700 p-2.5 text-slate-300 hover:border-emerald-400/50 hover:text-emerald-300"><Mail size={17}/></a></div></div>
 
